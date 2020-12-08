@@ -4,51 +4,42 @@ import {
   NewGravatar,
   UpdatedGravatar
 } from "../generated/Contract/Contract"
-import { ExampleEntity } from "../generated/schema"
+import { Gravatar, Status} from "../generated/schema"
 
 export function handleNewGravatar(event: NewGravatar): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+  let entity = Gravatar.load(event.params.id.toHex())
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (entity == null) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+    entity = new Gravatar(event.params.id.toHex())
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
-
-  // Entity fields can be set based on event parameters
-  entity.id = event.params.id
-  entity.owner = event.params.owner
-
-  // Entities can be written to the store with `.save()`
+  // Entity fields can be set using simple assignments
+  entity.displayName=event.params.displayName
+  entity.imageUrl=event.params.imageUrl
+  entity.owner=event.params.owner
   entity.save()
 
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.getGravatar(...)
-  // - contract.gravatarToOwner(...)
-  // - contract.ownerToGravatar(...)
-  // - contract.gravatars(...)
+  let countent=Status.load('1')
+  if (countent==null) {
+    countent = new Status('1')
+    countent.gravatarCount=BigInt.fromI32(0)
+  }
+  countent.gravatarCount=countent.gravatarCount+BigInt.fromI32(1)
+  countent.save()
 }
 
-export function handleUpdatedGravatar(event: UpdatedGravatar): void {}
+
+export function handleUpdatedGravatar(event: UpdatedGravatar): void {
+  let entity = Gravatar.load(event.params.id.toHex())
+  if (entity==null){
+    entity=new Gravatar(event.params.id.toHex())
+  }
+  entity.displayName=event.params.displayName
+  entity.imageUrl=event.params.imageUrl
+  entity.owner=event.params.owner
+  entity.save()
+}
